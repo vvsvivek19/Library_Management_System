@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS Books (book_id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, author VARCHAR(255) NOT NULL, ISBN VARCHAR(20) UNIQUE NOT NULL, status ENUM('Available', 'Borrowed') DEFAULT 'Available';
+
+CREATE TABLE IF NOT EXISTS BorrowedBooks (borrow_id INT AUTO_INCREMENT PRIMARY KEY, book_id INT NOT NULL, borrower_name VARCHAR(255) NOT NULL, borrow_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, return_date TIMESTAMP NULL, FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE;
+
+CREATE TABLE IF NOT EXISTS Users (user_id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, email VARCHAR(255) UNIQUE NOT NULL, phone VARCHAR(20) UNIQUE NOT NULL, registered_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+Create (Add a Book)
+INSERT INTO Books (title, author, isbn, available_copies)  
+VALUES ('The Alchemist', 'Paulo Coelho', '9780061122415', 5);
+
+Read (Display All Books):
+SELECT * FROM Books;
+
+Search (Find Book by Title or ISBN)
+SELECT * FROM Books WHERE title = 'The Alchemist' OR isbn = '9780061122415';
+
+Update (Modify Book Details):
+UPDATE Books SET available_copies = available_copies - 1 WHERE isbn = '9780061122415';
+
+Delete (Remove a Book):
+DELETE FROM Books WHERE isbn = '9780061122415';
+DELETE FROM Books WHERE title = '9780061122415';

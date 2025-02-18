@@ -90,7 +90,7 @@ class Library:
             conn.close()
     
     '''
-    Method - Add book
+    Method - search book
     Access level - Admin and User
     Description - Allows you to search a book in library
     '''
@@ -146,7 +146,7 @@ class Library:
     '''
     @classmethod
     def borrow_book(isbn: str,cls):
-        isbn = input("Enter ISBN of the book to borrow: ").strip()
+        
         for book in cls.books:
             if book.ISBN == isbn:
                 if book.is_borrowed:
@@ -179,52 +179,5 @@ class Library:
         print("\nLibrary Collection:")
         for book in cls.books:
             print(book)
-
-while True:
-    time.sleep(0.1)
-    print("****************************************************")
-    print("           Welcome to Central Library")
-    print("*****************************************************")
-    print("Please choose from below")
-    time.sleep(0.1)
-    print("1. Add Book")
-    time.sleep(0.1)
-    print("2. Remove Book")
-    time.sleep(0.1)
-    print("3. Search Book")
-    time.sleep(0.1)
-    print("4. Borrow Book")
-    time.sleep(0.1)
-    print("5. Return Book")
-    time.sleep(0.1)
-    print("6. Display Book")
-    time.sleep(0.1)
-    print("7. Exit")
-    try:
-        choice = int(input("Please Enter the choice from 1 to 7: "))
-        if choice >=1 and choice <=7:
-            pass
-        else:
-            print("Invalid input! Please enter a number between 1 and 7.")
-            continue    
-    except ValueError:
-        print("Invalid input! Please enter a number between 1 and 7.")
-        continue
-
-    if choice == 1:
-        Library.add_book()
-    elif choice == 2:
-        Library.remove_book()
-    elif choice == 3:
-        Library.search_book()
-    elif choice == 4:
-        Library.borrow_book()
-    elif choice == 5:
-        Library.return_book()
-    elif choice == 6:
-        Library.display_books()
-    elif choice == 7:
-        print("Knowledge is power....")
-        print("Please visit our library again")
-        break
+    
     

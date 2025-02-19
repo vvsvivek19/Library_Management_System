@@ -33,8 +33,8 @@ Borrow a book (mark as borrowed, store user details). --> Pending
 
 2️⃣ Additional Features (Future Enhancements)
 🚀 Advanced User System
-- Admin Registration process --> Pending
-- Register & login functionality for users. --> Pending
+- Admin Registration process --> Done
+- Register & login functionality for users. --> PEnding
 - Admin & normal users (admin can add/remove books, normal users can only borrow/return).
 
 🚀 Book Reservation System

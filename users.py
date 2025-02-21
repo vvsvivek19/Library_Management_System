@@ -3,11 +3,252 @@ import pymysql
 import bcrypt 
 import getpass
 from library_management import Library,Book
+import os
 
 class User:
 
+    #LOGIN METHOD
+    @classmethod
+    def login(cls):
+        """Handles login logic for Admin and Student."""
+        try:
+            conn = pymysql.connect(
+                host="localhost",
+                user="root",
+                password="Vivek1465",
+                database="librarydb"
+            )
+            cursor = conn.cursor()
+            while True: # Keep showing menu until a valid choice is made
+                cls.clear_screen()
+                time.sleep(0.1)
+                print("****************************************************")
+                print("               Central Library")
+                print("*****************************************************")
+                print("="*53)
+                print("                     LOGIN MENU                       ")
+                print("="*53)
+                time.sleep(0.1)
+                print("1. Login as Admin")
+                time.sleep(0.1)
+                print("2. Login as Student")
+                time.sleep(0.1)
+                print("3. Go back to Home Menu  ")
+                
+                try:
+                    choice = int(input("Are you a student or admin? Please choose from above: "))
+                except ValueError:
+                    print("❌ Invalid input! Please enter a number (1, 2, or 3).")
+                    return
+            
+                #Loging in as a Admin logic
+                if choice == 1:
+                    cls.admin_login(cursor)
+                
+                #Loging in as a student logic
+                elif choice == 2:
+                    cls.student_login(cursor)
+                
+                #Going back logic
+                elif choice == 3:
+                    print("Going back to home page.....")
+                    return
+                
+                #Handling invalid choice
+                else:
+                    print("❌ Invalid Choice! Please select 1, 2, or 3.") 
+                    
+        except pymysql.MySQLError as err:
+             print("❌ Error Occurred:", err)
+        except Exception as general_err:
+                print("❌ Unexpected Error:", general_err)
+        finally:
+            # Close connection
+                try:
+                    if cursor:
+                        cursor.close()
+                    if conn:
+                        conn.close()
+                except Exception as close_err:
+                    print("❌ Error Closing Connection:", close_err)
+    
+    @classmethod
+    def admin_login(cls,cursor):
+        print("****************************************************")
+        print("--------------------ADMIN LOGIN----------------------")
+        username = input("Username: ").strip()
+        password = getpass.getpass("Password: ").strip()
+        
+        #checking if the admin user exists
+        cursor.execute("SELECT password, name FROM admin WHERE username = %s ",(username,))
+        result = cursor.fetchone()
+        if result:
+            stored_hashed_password = result[0].encode() # Convert stored password back to bytes
+            if bcrypt.checkpw(password.encode(),stored_hashed_password):
+                print(f"\n✅ Welcome {result[1]}! You are logged in as an admin.")
+                # time.sleep(1)  # Small delay before showing men
+                cls.admin_menu()
+                return
+            else:
+                print("❌ Incorrect password.")
+                input("Press Enter to continue...")  # Pause before returning to login
+        else:
+            print("❌ Admin User not found.")
+            input("Press Enter to continue...")  # Pause before returning to login
+    
+    @classmethod
+    def admin_menu(cls):
+        while True:
+            cls.clear_screen()
+            print("========== ADMIN MENU ==========")
+            print("1. Book Management")
+            print("2. User Management")
+            print("3. Borrowing & Returns")
+            print("4. Reports & Policies")
+            print("5. Notifications & Reminders")
+            print("6. Logout")
+
+            try:
+                category_choice = int(input("Enter your choice: "))
+            except ValueError:
+                print("❌ Invalid input! Please enter a valid number.")
+                continue
+            
+            if category_choice == 1:
+                cls.admin_book_management()
+            elif category_choice == 2:
+                cls.admin_user_management()
+            elif category_choice == 3:
+                cls.admin_borrowing_return_management()
+            elif category_choice == 4:
+                cls.admin_report_policies_management()
+            elif category_choice == 5:
+                cls.admin_notification_reminder_management()
+            elif category_choice == 6:
+                print("👋 Logging out...")
+                break
+    
+    # Book Management Menu
+    @classmethod
+    def admin_book_management(cls):
+        """Admin menu for book-related actions."""
+        while True:
+            cls.clear_screen()
+            print("\n📚 **Book Management**")
+            print("1. Add a book")
+            print("2. Remove a book (Mark as unavailable/Permanently delete)")
+            print("3. Update book details")
+            print("4. Search a book (by Title/Author/Genre/ISBN)")
+            print("5. Display available books")
+            print("6. Go back")
+
+            try:
+                book_choice = int(input("Choose an option: "))
+            except ValueError:
+                print("❌ Invalid input! Please enter a valid number.")
+                continue
+
+            if book_choice == 6:
+                break  # Go back to main admin menu
+            elif book_choice not in [1, 2, 3, 4, 5]:
+                print("❌ Invalid option! Please choose a valid option.")
+    
+    # User Management Menu
+    @classmethod
+    def admin_user_management(cls):
+        """Admin menu for user-related actions."""
+        while True:
+            cls.clear_screen()
+            print("\n👤 **User Management**")
+            print("1. See borrow history of a user")
+            print("2. View user details and borrowed books")
+            print("3. Remove an admin user (Super Admin Only)")
+            print("4. Add/Edit admin users (Super Admin only)")
+            print("5. Go back")
+
+            try:
+                user_choice = int(input("Choose an option: "))
+            except ValueError:
+                print("❌ Invalid input! Please enter a valid number.")
+                continue
+
+            if user_choice == 5:
+                break
+            elif user_choice not in [1, 2, 3, 4]:
+                print("❌ Invalid option! Please choose a valid option.")
+    
+    # Borrowing & Returns Menu
+    @classmethod
+    def admin_borrowing_return_management(cls):
+        while True:
+            cls.clear_screen()
+            print("\n📖 **Borrowing & Returns**")
+            print("1. Borrow a book (for admin testing)")
+            print("2. Return a book as an admin")
+            print("3. View all borrowed books (Check overdue books)")
+            print("4. Go back")
+
+            try:
+                borrow_choice = int(input("Choose an option: "))
+            except ValueError:
+                print("❌ Invalid input! Please enter a valid number.")
+                continue
+
+            if borrow_choice == 4:
+                break
+            elif borrow_choice not in [1, 2, 3]:
+                print("❌ Invalid option! Please choose a valid option.")
+    
+    # Reports & Policies Menu
+    @classmethod
+    def admin_report_policies_management(cls):
+        while True:
+            cls.clear_screen()
+            print("\n📊 **Reports & Policies**")
+            print("1. Generate reports (Borrowing trends, Most borrowed books, Overdue fines)")
+            print("2. Fine Calculation")
+            print("3. Update library policies (Fine amount, Borrowing limit)")
+            print("4. Go back")
+
+            try:
+                report_choice = int(input("Choose an option: "))
+            except ValueError:
+                print("❌ Invalid input! Please enter a valid number.")
+                continue
+
+            if report_choice == 4:
+                break
+            elif report_choice not in [1, 2, 3]:
+                print("❌ Invalid option! Please choose a valid option.")
+
+    # Notifications & Reminders Menu
+    @classmethod
+    def admin_notification_reminder_management(cls):
+        while True:
+            print("\n📩 **Notifications & Reminders**")
+            print("1. Send reminders for overdue books (Email/SMS)")
+            print("2. Go back")
+
+            try:
+                notify_choice = int(input("Choose an option: "))
+            except ValueError:
+                print("❌ Invalid input! Please enter a valid number.")
+                continue
+
+            if notify_choice == 2:
+                break
+            elif notify_choice != 1:
+                print("❌ Invalid option! Please choose a valid option.")
+    
+    @classmethod
+    def student_login(cls, cursor):
+        """Placeholder for student login logic (to be implemented later)."""
+        print("Student login feature coming soon!")
+        
+    #REGISTER FUNCTION
     @classmethod
     def register(cls):
+        cls.clear_screen()
         while True:
             try:
                 conn = pymysql.connect(
@@ -21,6 +262,9 @@ class User:
                 print("****************************************************")
                 print("               Central Library")
                 print("*****************************************************")
+                print("="*53)
+                print("                     REGISTER MENU                       ")
+                print("="*53)
                 time.sleep(0.1)
                 print("Whom do you want to register as?")
                 time.sleep(0.1)
@@ -152,88 +396,14 @@ class User:
                         conn.close()
                 except Exception as close_err:
                     print("❌ Error Closing Connection:", close_err)
-        
-    @classmethod
-    def login(cls):
-        try:
-            conn = pymysql.connect(
-                host="localhost",
-                user="root",
-                password="Vivek1465",
-                database="librarydb"
-            )
-            cursor = conn.cursor()
-            time.sleep(0.1)
-            print("****************************************************")
-            print("               Central Library")
-            print("*****************************************************")
-            time.sleep(0.1)
-            print("1. Login as Admin")
-            time.sleep(0.1)
-            print("2. Login as Student")
-            time.sleep(0.1)
-            print("3. Go back")
-            
-            try:
-                choice = int(input("Are you a student or admin? Please choose from above: "))
-            except ValueError:
-                print("❌ Invalid input! Please enter a number (1, 2, or 3).")
-                return
-            
-            #Loging in as a Admin logic
-            if choice == 1:
-                print("****************************************************")
-                print("--------------------ADMIN LOGIN----------------------")
-                username = input("Username: ").strip()
-                password = getpass.getpass("Password: ").strip()
-                cursor.execute("SELECT password, name FROM admin WHERE username = %s ",(username,))
-                result = cursor.fetchone()
-                if result:
-                    stored_hashed_password = result[0].encode() # Convert stored password back to bytes
-                    if bcrypt.checkpw(password.encode(),stored_hashed_password):
-                        print(f"\n✅ Welcome {result[1]}! You are logged in as an admin.")
-                        print("What do wanna do? Please choose from below\n")
-                        print("1. Add a book\n")
-                        print("2. Remove a book\n")
-                        print("3. Search a book\n")
-                        print("4. Display Available books\n")
-                        print("5. Update book details\n")
-                        print("6. Borrow a book as a admin\n")
-                        print("7. Return a book as a admin\n")
-                        print("8. See borrow history of a user\n")
-                        print("9. Fine Calculation\n")
-                        print("10. Report Generation\n")
-                        print("11. Remove a admin user (Super Admin Only)\n")
-                    else:
-                        print("❌ Incorrect password.")
-                else:
-                    print("❌ Admin User not found.")
-            
-            #Loging in as a student logic
-            elif choice == 2:
-                pass
-            
-            #Going back logic
-            elif choice == 3:
-                return
-            
-            #Handling invalid choice
-            else:
-                print("❌ Invalid Choice! Please select 1, 2, or 3.") 
-                    
-        except pymysql.MySQLError as err:
-             print("❌ Error Occurred:", err)
-        except Exception as general_err:
-                print("❌ Unexpected Error:", general_err)
-        finally:
-            # Close connection
-                try:
-                    if cursor:
-                        cursor.close()
-                    if conn:
-                        conn.close()
-                except Exception as close_err:
-                    print("❌ Error Closing Connection:", close_err)
+    
+    
+    
+    #Screen Clearing Method
+    @staticmethod
+    def clear_screen():
+        """Clears the console screen based on OS."""
+        os.system("cls" if os.name == "nt" else "clear")
         
     
     

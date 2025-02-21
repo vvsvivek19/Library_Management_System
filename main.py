@@ -1,12 +1,21 @@
 import time
 from users import User
+import os
+
+def clear_screen():
+    """Clears the console screen based on OS."""
+    os.system("cls" if os.name == "nt" else "clear")
 
 while True:
+    clear_screen()
     try:
         time.sleep(0.1)
         print("****************************************************")
-        print("           Welcome to Central Library")
+        print("           WELCOME TO CENTRAL LIBRARY")
         print("*****************************************************")
+        print("="*53)
+        print("                     HOME MENU                       ")
+        print("="*53)
         print("Please choose from below")
         time.sleep(0.1)
         print("1. Login")
@@ -32,3 +41,4 @@ while True:
             print("❌ Invalid input! Please enter a number between 1 and 3.")
     except Exception as e:
         print(f"⚠️ An unexpected error occurred: {e}")
+

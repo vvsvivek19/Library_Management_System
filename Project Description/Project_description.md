@@ -7,6 +7,11 @@ We can break the features into core features (required) and additional features 
 - Connect Python to MySQL using mysql-connector-python or SQLAlchemy. --> Done
 - Create a database (LibraryDB) and required tables (Books, BorrowedBooks, Users). --> Done
 
+✅ User System:
+- Login: Both as Admin and User
+- Register: Both Admin and User
+- Forgot Password: Both Admin and User
+
 ✅ Book Management
 - Add books (store title, author, ISBN, status). --> Done
 - Remove books (delete from database by ISBN). --> Done

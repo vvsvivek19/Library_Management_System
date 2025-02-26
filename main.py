@@ -1,9 +1,10 @@
+'''
+Importing Important modules - both native and external
+'''
 from Modules.login import Login
 from Modules.registration import Registration
 from Modules.forgot_password import ForgotPassword
 import time
-from Modules.login_registration import User
-
 import os
 from colorama import Fore, Style
 

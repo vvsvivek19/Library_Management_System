@@ -1,3 +1,6 @@
+'''
+Importing Important modules - both native and external
+'''
 import time
 import pymysql
 import bcrypt 
@@ -127,7 +130,8 @@ class Login:
             print(Fore.LIGHTCYAN_EX + "3. Borrowing & Returns" + Style.RESET_ALL)
             print(Fore.LIGHTCYAN_EX + "4. Reports & Policies" + Style.RESET_ALL)
             print(Fore.LIGHTCYAN_EX + "5. Notifications & Reminders" + Style.RESET_ALL)
-            print(Fore.LIGHTCYAN_EX + "6. Logout" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "6. Account Management" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "7. Logout" + Style.RESET_ALL)
 
             try:
                 category_choice = int(input(Fore.LIGHTYELLOW_EX + "Enter your choice: " + Style.RESET_ALL))
@@ -146,6 +150,8 @@ class Login:
             elif category_choice == 5:
                 cls.admin_notification_reminder_management()
             elif category_choice == 6:
+                cls.admin_account_management()
+            elif category_choice == 7:
                 print(Fore.GREEN + "👋 Logging out..." + Style.RESET_ALL)
                 input(Fore.LIGHTBLUE_EX + "Press any key to continue...."+ Style.RESET_ALL)
                 break
@@ -262,6 +268,30 @@ class Login:
                 break
             elif notify_choice != 1:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option."+ Style.RESET_ALL)
+    
+    #Admin Account Management menu
+    @classmethod
+    def admin_account_management(cls):
+        """admin menu for Account Management related actions."""
+        while True:
+            cls.clear_screen()
+            print(Fore.GREEN + "\n👤-- Admin Account Management--" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "1. Update Profile" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "2. Update Password" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "3. Update Security Questions" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "4. Go back" + Style.RESET_ALL)
+
+            try:
+                book_choice = int(input(Fore.LIGHTYELLOW_EX + "Choose an option: " + Style.RESET_ALL))
+            except ValueError:
+                input(Fore.RED + "❌ Invalid input! Please enter a valid number." + Style.RESET_ALL)
+                continue
+
+            if book_choice == 4:
+                return  # Go back to main student menu
+            elif book_choice not in [1,2,3]:
+                input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
+    
 #-----------------------------------------------------------------------------------------------------
     #STUDENT LOGIN METHOD
 #-----------------------------------------------------------------------------------------------------    
@@ -446,7 +476,9 @@ class Login:
             cls.clear_screen()
             print(Fore.GREEN + "\n👤-- Student Account Management--" + Style.RESET_ALL)
             print(Fore.LIGHTCYAN_EX + "1. Update Profile" + Style.RESET_ALL)
-            print(Fore.LIGHTCYAN_EX + "2. Go back" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "2. Update Password" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "3. Update Security Questions" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "4. Go back" + Style.RESET_ALL)
 
             try:
                 book_choice = int(input(Fore.LIGHTYELLOW_EX + "Choose an option: " + Style.RESET_ALL))
@@ -454,9 +486,9 @@ class Login:
                 input(Fore.RED + "❌ Invalid input! Please enter a valid number." + Style.RESET_ALL)
                 continue
 
-            if book_choice == 2:
+            if book_choice == 4:
                 return  # Go back to main student menu
-            elif book_choice != 1:
+            elif book_choice not in [1,2,3]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
     
     #Student  Additional Features (Optional for Later) menu

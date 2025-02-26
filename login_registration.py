@@ -2,14 +2,14 @@ import time
 import pymysql
 import bcrypt 
 import getpass
-from library_management import Library,Book
 import os
 from colorama import Fore, Style
 
 
 class User:
-
+#-----------------------------------------------------------------------------------------------------
     #LOGIN METHOD
+#-----------------------------------------------------------------------------------------------------
     @classmethod
     def login(cls):
         """Handles login logic for Admin and Student."""
@@ -75,32 +75,37 @@ class User:
                         conn.close()
                 except Exception as close_err:
                     print(Fore.RED + "❌ Error Closing Connection:", close_err + Style.RESET_ALL)
-    
+#-----------------------------------------------------------------------------------------------------
+    #ADMIN LOGIN METHOD
+#-----------------------------------------------------------------------------------------------------
     @classmethod
     def admin_login(cls,cursor):
-        cls.clear_screen()
-        print(Fore.CYAN + "=====================================================" + Style.RESET_ALL)
-        print(Fore.GREEN + "--------------------ADMIN LOGIN----------------------" + Style.RESET_ALL)
-        print(Fore.CYAN + "=====================================================" + Style.RESET_ALL)
-        username = input(Fore.LIGHTMAGENTA_EX + "Username: " + Style.RESET_ALL).strip()
-        password = getpass.getpass(Fore.LIGHTMAGENTA_EX + "Password: " + Style.RESET_ALL).strip()
-        
-        #checking if the admin user exists
-        cursor.execute("SELECT password, name FROM admin WHERE username = %s ",(username,))
-        result = cursor.fetchone()
-        if result:
-            stored_hashed_password = result[0].encode() # Convert stored password back to bytes
-            if bcrypt.checkpw(password.encode(),stored_hashed_password):
-                print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[1]}! You are logged in as an admin." + Style.RESET_ALL)
-                time.sleep(2)  # Small delay before showing men
-                cls.admin_menu()
-                return
+        max_password_attempt = 3
+        password_attempt = 0
+        while password_attempt < max_password_attempt:
+            cls.clear_screen()
+            print(Fore.CYAN + "=====================================================" + Style.RESET_ALL)
+            print(Fore.GREEN + "--------------------ADMIN LOGIN----------------------" + Style.RESET_ALL)
+            print(Fore.CYAN + "=====================================================" + Style.RESET_ALL)
+            username = input(Fore.LIGHTMAGENTA_EX + "Username: " + Style.RESET_ALL).strip()
+            password = getpass.getpass(Fore.LIGHTMAGENTA_EX + "Password: " + Style.RESET_ALL).strip()
+            
+            #checking if the admin user exists
+            cursor.execute("SELECT password, name FROM admin WHERE username = %s ",(username,))
+            result = cursor.fetchone()
+            if result:
+                stored_hashed_password = result[0].encode() # Convert stored password back to bytes
+                if bcrypt.checkpw(password.encode(),stored_hashed_password):
+                    print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[1]}! You are logged in as an admin." + Style.RESET_ALL)
+                    time.sleep(2)  # Small delay before showing men
+                    cls.admin_menu()
+                    return
+                else:
+                    print(Fore.RED + "❌ Incorrect password." + Style.RESET_ALL)
+                    input(Fore.LIGHTBLUE_EX + "Press Enter to continue..." + Style.RESET_ALL)  # Pause before returning to login
             else:
-                print(Fore.RED + "❌ Incorrect password." + Style.RESET_ALL)
+                print(Fore.RED + "❌ Admin User not found." + Style.RESET_ALL)
                 input(Fore.LIGHTBLUE_EX + "Press Enter to continue..." + Style.RESET_ALL)  # Pause before returning to login
-        else:
-            print(Fore.RED + "❌ Admin User not found." + Style.RESET_ALL)
-            input(Fore.LIGHTBLUE_EX + "Press Enter to continue..." + Style.RESET_ALL)  # Pause before returning to login
     
     @classmethod
     def admin_menu(cls):
@@ -137,13 +142,13 @@ class User:
                 input(Fore.LIGHTBLUE_EX + "Press any key to continue...."+ Style.RESET_ALL)
                 break
     
-    # Book Management Menu
+    # Admin Book Management Menu
     @classmethod
     def admin_book_management(cls):
         """Admin menu for book-related actions."""
         while True:
             cls.clear_screen()
-            print(Fore.GREEN + "\n📚 --Book Management--" + Style.RESET_ALL)
+            print(Fore.GREEN + "\n📚 --Admin Book Management--" + Style.RESET_ALL)
             print(Fore.LIGHTCYAN_EX + "1. Add a book" + Style.RESET_ALL)
             print(Fore.LIGHTCYAN_EX + "2. Remove a book (Mark as unavailable/Permanently delete)" + Style.RESET_ALL)
             print(Fore.LIGHTCYAN_EX + "3. Update book details" + Style.RESET_ALL)
@@ -249,57 +254,229 @@ class User:
                 break
             elif notify_choice != 1:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option."+ Style.RESET_ALL)
-    
+#-----------------------------------------------------------------------------------------------------
+    #STUDENT LOGIN METHOD
+#-----------------------------------------------------------------------------------------------------    
     @classmethod
     def student_login(cls, cursor):
-        """Placeholder for student login logic (to be implemented later)."""
-        while True:
+        max_password_attempt = 3 # Max allowed attempts
+        password_attempt = 0 # Track failed attempts
+        while password_attempt < max_password_attempt:
             cls.clear_screen()
             print(Fore.CYAN + "=====================================================" + Style.RESET_ALL)
             print(Fore.GREEN + "--------------------STUDENT LOGIN-------------------" + Style.RESET_ALL)
             print(Fore.CYAN + "=====================================================" + Style.RESET_ALL)
             try:
-                choice = int(input(Fore.LIGHTYELLOW_EX + "Use login method:\n1. Email\n2. Phone Number\nEnter Choice: " + Style.RESET_ALL).strip())
+                choice = int(input(Fore.LIGHTYELLOW_EX + "Use login method:\n1. Email\n2. Phone Number\n3. Exit to Login menu\nEnter Choice: " + Style.RESET_ALL).strip())
             except ValueError:
                 input(Fore.RED + "❌ Invalid input! Please enter a number (1 or 2)." + Style.RESET_ALL)
                 return
+            
+            #checking if the student user exists
             if choice == 1:
                 email = input(Fore.LIGHTMAGENTA_EX + "Email: " + Style.RESET_ALL).strip()
                 password = getpass.getpass(Fore.LIGHTMAGENTA_EX + "Password: " + Style.RESET_ALL).strip()
                 #checking if the student user exists
-                cursor.execute("SELECT password, email FROM users WHERE email = %s ",(email,))
+                cursor.execute("SELECT name, password, email FROM users WHERE email = %s ",(email,))
                 result = cursor.fetchone()
             elif choice == 2:
                 phone = input(Fore.LIGHTMAGENTA_EX + "Phone: " + Style.RESET_ALL).strip()
                 password = getpass.getpass(Fore.LIGHTMAGENTA_EX + "Password: " + Style.RESET_ALL)
                 #checking if the student user exists
-                cursor.execute("SELECT password, phone FROM users WHERE phone = %s ",(phone,))
+                cursor.execute("SELECT name, password, phone FROM users WHERE phone = %s ",(phone,))
                 result = cursor.fetchone()
+            elif choice == 3:
+                print(Fore.LIGHTBLUE_EX + "🔙 Going back to Login menu..." + Style.RESET_ALL)
+                time.sleep(1)
+                return
             else:
-                print(Fore.RED + "❌ Invalid Choice: Please choose either 1 or 2." + Style.RESET_ALL)
-                input(Fore.LIGHTBLUE_EX + "Press Enter to try again..." + Style.RESET_ALL)
-                continue
+                print(Fore.RED + "❌ Invalid Choice: Please choose either 1, 2, or 3." + Style.RESET_ALL)
+                try:
+                    user_exit_choice = int(input("Press 1 to try again or press 2 to exit to login menu: "))
+                    if user_exit_choice == 1:
+                        print(Fore.LIGHTBLUE_EX + "🔄 Please enter the credentials again..." + Style.RESET_ALL)
+                        continue
+                    else:
+                        print(Fore.LIGHTBLUE_EX + "🔙 Going back to Login menu..." + Style.RESET_ALL)
+                        time.sleep(1)
+                        return  # Fully exit the function
+                except ValueError:
+                    print(Fore.RED + "❌ Invalid input! Returning to login menu..." + Style.RESET_ALL)
+                    time.sleep(1)
+                    return  # Exit on invalid input
             
             if result:
-                stored_hashed_password = result[0].encode() # Convert stored password back to bytes
+                stored_hashed_password = result[1].encode() # Convert stored password back to bytes
                 if bcrypt.checkpw(password.encode(),stored_hashed_password):
-                    print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[1]}! You are logged in as an student." + Style.RESET_ALL)
-                    time.sleep(2)  # Small delay before showing men
+                    print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[0]}... You are logged in as an student." + Style.RESET_ALL)
+                    time.sleep(2)  # Small delay before showing menu
+                    password_attempt = 0
                     cls.student_menu()
                     return
                 else:
-                    print(Fore.RED + "❌ Incorrect password." + Style.RESET_ALL)
+                    password_attempt += 1
+                    print(Fore.RED + f"❌ Incorrect password. Attempts left: {max_password_attempt - password_attempt}" + Style.RESET_ALL)
                     input(Fore.LIGHTBLUE_EX + "Press Enter to continue..." + Style.RESET_ALL)  # Pause before returning to login
             else:
-                print(Fore.RED + "❌ Student User not found." + Style.RESET_ALL)
+                password_attempt += 1
+                print(Fore.RED + f"❌ Student User not found. Attempts left: {max_password_attempt - password_attempt}" + Style.RESET_ALL)
                 input(Fore.LIGHTBLUE_EX + "Press Enter to continue..." + Style.RESET_ALL)  # Pause before returning to login
+            
+        print(Fore.RED + "❌ Too many failed attempts! Try again later." + Style.RESET_ALL)
+        print(Fore.LIGHTBLUE_EX + "Going back to Login Menu..." + Style.RESET_ALL)
+        time.sleep(2)
+        return
+                
                 
     @classmethod
     def student_menu(cls):
-        print("To be implement.....")
-        input("Press any key to exit..")
+         while True:
+            cls.clear_screen()
+            print(Fore.CYAN + "================================"+ Style.RESET_ALL)
+            print(Fore.GREEN + "========== STUDENT MENU =======" + Style.RESET_ALL)
+            print(Fore.CYAN + "================================"+ Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "1. 🔍 Book Management" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "2. 📖 Borrowing & Returns" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "3. 💰 Fines & Due Dates" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "4. 👤 Account Management" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "5. ✨ Additional Features (Optional for Later)" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "6. 🔙 Logout" + Style.RESET_ALL)
+
+            try:
+                category_choice = int(input(Fore.LIGHTYELLOW_EX + "Enter your choice: " + Style.RESET_ALL))
+            except ValueError:
+                input(Fore.RED + "❌ Invalid input! Please enter a valid number." + Style.RESET_ALL)
+                continue
+            
+            if category_choice == 1:
+                cls.student_book_management()
+            elif category_choice == 2:
+                cls.student_borrowing_returns()
+            elif category_choice == 3:
+                cls.student_fines_due_dates()
+            elif category_choice == 4:
+                cls.student_account_management()
+            elif category_choice == 5:
+                cls.student_additional_features()
+            elif category_choice == 6:
+                print(Fore.GREEN + "👋 Logging out..." + Style.RESET_ALL)
+                input(Fore.LIGHTBLUE_EX + "Press any key to continue...."+ Style.RESET_ALL)
+                break
     
+    #Student Book Management Menu
+    @classmethod
+    def student_book_management(cls):
+        """student menu for book-related actions."""
+        while True:
+            cls.clear_screen()
+            print(Fore.GREEN + "\n📚 --Student Book Management--" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "1. Display available books" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "2. Search a book (by Title/Author/Genre/ISBN)" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "3. Go back" + Style.RESET_ALL)
+
+            try:
+                book_choice = int(input(Fore.LIGHTYELLOW_EX + "Choose an option: " + Style.RESET_ALL))
+            except ValueError:
+                input(Fore.RED + "❌ Invalid input! Please enter a valid number." + Style.RESET_ALL)
+                continue
+
+            if book_choice == 3:
+                return  # Go back to main student menu
+            elif book_choice not in [1, 2]:
+                input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
+    
+    #Student Borrowing & Returns menu
+    @classmethod
+    def student_borrowing_returns(cls):
+        """student menu for Borrowing & Returns related actions."""
+        while True:
+            cls.clear_screen()
+            print(Fore.GREEN + "\n📖-- Student Borrowing & Returns--" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "1. Borrow a Book" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "2. Return a Book" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "3. Renew a Book" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "4. Go back" + Style.RESET_ALL)
+
+            try:
+                book_choice = int(input(Fore.LIGHTYELLOW_EX + "Choose an option: " + Style.RESET_ALL))
+            except ValueError:
+                input(Fore.RED + "❌ Invalid input! Please enter a valid number." + Style.RESET_ALL)
+                continue
+
+            if book_choice == 4:
+                return  # Go back to main student menu
+            elif book_choice not in [1, 2, 3]:
+                input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
+    
+    #Student Fines & Due Dates menu
+    @classmethod
+    def student_fines_due_dates(cls):
+        """student menu for Fines & Due Date related actions."""
+        while True:
+            cls.clear_screen()
+            print(Fore.GREEN + "\n💰-- Student Fines & Due Dates--" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "1. View Borrowed Books" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "2. Check Fine" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "3. Go back" + Style.RESET_ALL)
+
+            try:
+                book_choice = int(input(Fore.LIGHTYELLOW_EX + "Choose an option: " + Style.RESET_ALL))
+            except ValueError:
+                input(Fore.RED + "❌ Invalid input! Please enter a valid number." + Style.RESET_ALL)
+                continue
+
+            if book_choice == 3:
+                return  # Go back to main student menu
+            elif book_choice not in [1, 2]:
+                input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
+    
+    #Student Account Management menu
+    @classmethod
+    def student_account_management(cls):
+        """student menu for Account Management related actions."""
+        while True:
+            cls.clear_screen()
+            print(Fore.GREEN + "\n👤-- Student Account Management--" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "1. Update Profile" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "2. Go back" + Style.RESET_ALL)
+
+            try:
+                book_choice = int(input(Fore.LIGHTYELLOW_EX + "Choose an option: " + Style.RESET_ALL))
+            except ValueError:
+                input(Fore.RED + "❌ Invalid input! Please enter a valid number." + Style.RESET_ALL)
+                continue
+
+            if book_choice == 2:
+                return  # Go back to main student menu
+            elif book_choice != 1:
+                input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
+    
+    #Student  Additional Features (Optional for Later) menu
+    @classmethod
+    def student_additional_features(cls):
+        """student menu for  Additional Features (Optional for Later) related actions."""
+        while True:
+            cls.clear_screen()
+            print(Fore.GREEN + "\n✨-- Student  Additional Features (Optional for Later)--" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "1. Request a Book" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "2. Reserve a Book" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "3. Feedback/Complaints" + Style.RESET_ALL)
+            print(Fore.LIGHTCYAN_EX + "4. Go Back" + Style.RESET_ALL)
+
+            try:
+                book_choice = int(input(Fore.LIGHTYELLOW_EX + "Choose an option: " + Style.RESET_ALL))
+            except ValueError:
+                input(Fore.RED + "❌ Invalid input! Please enter a valid number." + Style.RESET_ALL)
+                continue
+
+            if book_choice == 4:
+                return  # Go back to main student menu
+            elif book_choice not in [1, 2,3]:
+                input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
+    
+#----------------------------------------------------------------------------------------------------------------------------
     #REGISTER FUNCTION
+#----------------------------------------------------------------------------------------------------------------------------
     @classmethod
     def register(cls):
         

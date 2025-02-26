@@ -98,14 +98,22 @@ class User:
                 if bcrypt.checkpw(password.encode(),stored_hashed_password):
                     print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[1]}! You are logged in as an admin." + Style.RESET_ALL)
                     time.sleep(2)  # Small delay before showing men
+                    password_attempt = 0
                     cls.admin_menu()
                     return
                 else:
-                    print(Fore.RED + "❌ Incorrect password." + Style.RESET_ALL)
+                    password_attempt += 1
+                    print(Fore.RED + f"❌ Incorrect password. Attempts left: {max_password_attempt - password_attempt}" + Style.RESET_ALL)
                     input(Fore.LIGHTBLUE_EX + "Press Enter to continue..." + Style.RESET_ALL)  # Pause before returning to login
             else:
-                print(Fore.RED + "❌ Admin User not found." + Style.RESET_ALL)
+                password_attempt += 1
+                print(Fore.RED + f"❌ Admin User not found. Attempts left: {max_password_attempt - password_attempt}" + Style.RESET_ALL)
                 input(Fore.LIGHTBLUE_EX + "Press Enter to continue..." + Style.RESET_ALL)  # Pause before returning to login
+         
+        print(Fore.RED + "❌ Too many failed attempts! Please Contact Super User." + Style.RESET_ALL)
+        print(Fore.LIGHTBLUE_EX + "Going back to Login Menu..." + Style.RESET_ALL)
+        time.sleep(2)
+        return
     
     @classmethod
     def admin_menu(cls):

@@ -7,6 +7,7 @@ import bcrypt
 import getpass
 import os
 from colorama import Fore, Style
+from Modules.utils import SECURITY_QUESTIONS
 
 
 class Login:
@@ -66,9 +67,12 @@ class Login:
                     input(Fore.LIGHTBLUE_EX  + "Press to continue...." + Style.RESET_ALL)
                     
         except pymysql.MySQLError as err:
-             print(Fore.RED + "❌ Error Occurred:", err + Style.RESET_ALL)
+            print(Fore.RED + "❌ Error Occurred:" +  str(err) + Style.RESET_ALL)
         except Exception as general_err:
-                print(Fore.RED + "❌ Unexpected Error:", general_err + Style.RESET_ALL)
+            print(Fore.RED + "❌ Unexpected Error:" + str(general_err) + Style.RESET_ALL)
+            import traceback
+            traceback.print_exc()
+            time.sleep(30)
         finally:
             # Close connection
                 try:
@@ -97,6 +101,12 @@ class Login:
             cursor.execute("SELECT password, name FROM admin WHERE username = %s ",(username,))
             result = cursor.fetchone()
             if result:
+                cursor.execute("SELECT ans_1 from admin where username = %s",(username,))
+                stored_answer = cursor.fetchone()[0]
+                if stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
+                    print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
+                    time.sleep(2)
+                    cls.admin_update_security_questions(cursor, username)                
                 stored_hashed_password = result[0].encode() # Convert stored password back to bytes
                 if bcrypt.checkpw(password.encode(),stored_hashed_password):
                     print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[1]}! You are logged in as an admin." + Style.RESET_ALL)
@@ -344,6 +354,20 @@ class Login:
                     return  # Exit on invalid input
             
             if result:
+                if choice == 1:
+                    cursor.execute("SELECT ans_1 from users where email = %s",(email,))
+                    stored_answer = cursor.fetchone()[0]
+                    if stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
+                        print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
+                        time.sleep(2)
+                        cls.student_update_security_questions(cursor, email)
+                elif choice == 2:
+                    cursor.execute("SELECT ans_1 from users where phone = %s",(phone,))
+                    stored_answer = cursor.fetchone()[0]
+                    if  stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
+                        print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
+                        time.sleep(2)
+                        cls.student_update_security_questions(cursor, phone)
                 stored_hashed_password = result[1].encode() # Convert stored password back to bytes
                 if bcrypt.checkpw(password.encode(),stored_hashed_password):
                     print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[0]}... You are logged in as an student." + Style.RESET_ALL)
@@ -514,12 +538,98 @@ class Login:
             elif book_choice not in [1, 2,3]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
     
+#-----------------------------------------------------------------------------------------------------
+# STATIC METHOD TO UPDATE SECURITY QUESTIONS FOR EXISTING ADMIN USER
+#-----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def admin_update_security_questions(cursor, username):
+        
+        print(Fore.LIGHTYELLOW_EX + "Select 3 questions from below list of questions: " + Style.RESET_ALL)
+        
+        #printing questions
+        for idx, question in enumerate(SECURITY_QUESTIONS):
+            print(f"{idx + 1 }.{question}")
+        
+        #user selects 3 questions from above list (stored as indexes)
+        selected_indexes = []
+        while len(selected_indexes) < 3: 
+            try:
+                choice = int(input(Fore.LIGHTYELLOW_EX + f"Choose Question {len(selected_indexes) + 1 }: " + Style.RESET_ALL)) - 1
+                if 0 <= choice < len(SECURITY_QUESTIONS) and choice not in selected_indexes:
+                    selected_indexes.append(choice)
+                else:
+                    print(Fore.RED + "❌ Invalid choice or already selected. Try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "❌ Invalid input! Please enter a number between 1 and 9." + Style.RESET_ALL)
+        
+        #getting the answers and hashing them
+        answers = []
+        for idx in selected_indexes:
+            answer = input(Fore.LIGHTYELLOW_EX + f"Answer for {SECURITY_QUESTIONS[idx] }:" + Style.RESET_ALL).strip()
+            hashed_answer = bcrypt.hashpw(answer.encode(),bcrypt.gensalt()).decode() #hashing the answer
+            answers.append(hashed_answer)
+        
+        cursor.execute("""UPDATE admin 
+                  SET ques_1 = %s, ques_2 = %s, ques_3 = %s, ans_1 = %s, ans_2 = %s, ans_3 = %s 
+                  WHERE username = %s""",
+               (*selected_indexes, *answers, username))
+        cursor.connection.commit()
 
+        
+        print(Fore.LIGHTGREEN_EX + f"\n✅ Security questions updated successfully." + Style.RESET_ALL)
+        
+
+#-----------------------------------------------------------------------------------------------------
+# STATIC METHOD TO UPDATE SECURITY QUESTIONS FOR EXISTING STUDENT USER
+#-----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def student_update_security_questions(cursor, email=None,phone=None):
+        
+        print(Fore.LIGHTYELLOW_EX + "Select 3 questions from below list of questions: " + Style.RESET_ALL)
+        
+        #printing questions
+        for idx, question in enumerate(SECURITY_QUESTIONS):
+            print(f"{idx + 1 }.{question}")
+        
+        #user selects 3 questions from above list (stored as indexes)
+        selected_indexes = []
+        while len(selected_indexes) < 3: 
+            try:
+                choice = int(input(Fore.LIGHTYELLOW_EX + f"Choose Question {len(selected_indexes) +1 }: " + Style.RESET_ALL)) - 1
+                if 0 <= choice < len(SECURITY_QUESTIONS) and choice not in selected_indexes:
+                    selected_indexes.append(choice)
+                else:
+                    print(Fore.RED + "❌ Invalid choice or already selected. Try again." + Style.RESET_ALL)
+            except ValueError:
+                input(Fore.RED + "❌ Invalid input! Please enter a number - between 1 and 9." + Style.RESET_ALL)
+        
+        #getting the answers and hashing them
+        answers = []
+        for idx in selected_indexes:
+            answer = input(Fore.LIGHTYELLOW_EX + f"Answer for {SECURITY_QUESTIONS[idx] }:" + Style.RESET_ALL).strip()
+            hashed_answer = bcrypt.hashpw(answer.encode(),bcrypt.gensalt()) #hashing the answer
+            answers.append(hashed_answer)
+        
+        if email != None:
+            cursor.execute("""UPDATE users 
+                  SET ques_1 = %s, ques_2 = %s, ques_3 = %s, ans_1 = %s, ans_2 = %s, ans_3 = %s 
+                  WHERE email = %s""",
+               (*selected_indexes, *answers, email))
+            cursor.connection.commit()
+        elif phone != None:
+             cursor.execute("""UPDATE users 
+                  SET ques_1 = %s, ques_2 = %s, ques_3 = %s, ans_1 = %s, ans_2 = %s, ans_3 = %s 
+                  WHERE phone = %s""",
+               (*selected_indexes, *answers, phone))
+             cursor.connection.commit()
+        print(Fore.LIGHTGREEN_EX + f"\nAnswers updated successfully." + Style.RESET_ALL)
+        
     #Screen Clearing Method
     @staticmethod
     def clear_screen():
         """Clears the console screen based on OS."""
         os.system("cls" if os.name == "nt" else "clear")
+    
         
     
     

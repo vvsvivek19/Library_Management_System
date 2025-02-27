@@ -101,15 +101,15 @@ class Login:
             cursor.execute("SELECT password, name FROM admin WHERE username = %s ",(username,))
             result = cursor.fetchone()
             if result:
-                cursor.execute("SELECT ans_1 from admin where username = %s",(username,))
-                stored_answer = cursor.fetchone()[0]
-                if stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
-                    print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
-                    time.sleep(2)
-                    cls.admin_update_security_questions(cursor, username)                
                 stored_hashed_password = result[0].encode() # Convert stored password back to bytes
                 if bcrypt.checkpw(password.encode(),stored_hashed_password):
                     print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[1]}! You are logged in as an admin." + Style.RESET_ALL)
+                    cursor.execute("SELECT ans_1 from admin where username = %s",(username,))
+                    stored_answer = cursor.fetchone()[0]
+                    if stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
+                        print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
+                        time.sleep(2)
+                        cls.admin_update_security_questions(cursor, username)                
                     time.sleep(2)  # Small delay before showing men
                     password_attempt = 0
                     cls.admin_menu()
@@ -354,23 +354,23 @@ class Login:
                     return  # Exit on invalid input
             
             if result:
-                if choice == 1:
-                    cursor.execute("SELECT ans_1 from users where email = %s",(email,))
-                    stored_answer = cursor.fetchone()[0]
-                    if stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
-                        print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
-                        time.sleep(2)
-                        cls.student_update_security_questions(cursor, email)
-                elif choice == 2:
-                    cursor.execute("SELECT ans_1 from users where phone = %s",(phone,))
-                    stored_answer = cursor.fetchone()[0]
-                    if  stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
-                        print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
-                        time.sleep(2)
-                        cls.student_update_security_questions(cursor, phone)
                 stored_hashed_password = result[1].encode() # Convert stored password back to bytes
                 if bcrypt.checkpw(password.encode(),stored_hashed_password):
                     print(Fore.LIGHTGREEN_EX + f"\n✅ Welcome {result[0]}... You are logged in as an student." + Style.RESET_ALL)
+                    if choice == 1:
+                        cursor.execute("SELECT ans_1 from users where email = %s",(email,))
+                        stored_answer = cursor.fetchone()[0]
+                        if stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
+                            print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
+                            time.sleep(2)
+                            cls.student_update_security_questions(cursor, email)
+                    elif choice == 2:
+                        cursor.execute("SELECT ans_1 from users where phone = %s",(phone,))
+                        stored_answer = cursor.fetchone()[0]
+                        if  stored_answer is None or bcrypt.checkpw("DefaultAnswer123".encode(),stored_answer.encode()):
+                            print(Fore.YELLOW + "\n⚠️ Security Alert: Please update your security questions!" + Style.RESET_ALL)
+                            time.sleep(2)
+                            cls.student_update_security_questions(cursor, phone)
                     time.sleep(2)  # Small delay before showing menu
                     password_attempt = 0
                     cls.student_menu()

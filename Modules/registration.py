@@ -169,6 +169,46 @@ class Registration:
                         conn.close()
                 except Exception as close_err:
                     print(Fore.RED + "❌ Error Closing Connection:"+ Style.RESET_ALL, close_err)
+#-----------------------------------------------------------------------------------------------------
+# STATIC METHOD TO SET DEFAULT ANSWERS OF SECURITY QUESTIONS FOR ADMIN
+#-----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def admin_set_default_security_questions(cursor, username):
+        
+        print(Fore.LIGHTYELLOW_EX + "Select 3 questions from below list of questions: " + Style.RESET_ALL)
+        
+        #printing questions
+        for idx, question in enumerate(SECURITY_QUESTIONS):
+            print(f"{idx + 1 }.{question}")
+        
+        #user selects 3 questions from above list (stored as indexes)
+        selected_indexes = []
+        while len(selected_indexes) < 3: 
+            try:
+                choice = int(input(Fore.LIGHTYELLOW_EX + f"Choose Question {len(selected_indexes) + 1 }: " + Style.RESET_ALL)) - 1
+                if 0 <= choice < len(SECURITY_QUESTIONS) and choice not in selected_indexes:
+                    selected_indexes.append(choice)
+                else:
+                    print(Fore.RED + "❌ Invalid choice or already selected. Try again." + Style.RESET_ALL)
+            except ValueError:
+                print(Fore.RED + "❌ Invalid input! Please enter a number between 1 and 9." + Style.RESET_ALL)
+        
+        #getting the answers and hashing them
+        answers = []
+        for idx in selected_indexes:
+            answer = input(Fore.LIGHTYELLOW_EX + f"Answer for {SECURITY_QUESTIONS[idx] }:" + Style.RESET_ALL).strip()
+            hashed_answer = bcrypt.hashpw(answer.encode(),bcrypt.gensalt()).decode() #hashing the answer
+            answers.append(hashed_answer)
+        
+        cursor.execute("""UPDATE admin 
+                  SET ques_1 = %s, ques_2 = %s, ques_3 = %s, ans_1 = %s, ans_2 = %s, ans_3 = %s 
+                  WHERE username = %s""",
+               (*selected_indexes, *answers, username))
+        cursor.connection.commit()
+
+        
+        print(Fore.LIGHTGREEN_EX + f"\n✅ Security questions updated successfully." + Style.RESET_ALL)
+        
     
     #Screen Clearing Method
     @staticmethod

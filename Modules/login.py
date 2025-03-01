@@ -127,7 +127,9 @@ class Login:
         print(Fore.LIGHTBLUE_EX + "Going back to Login Menu..." + Style.RESET_ALL)
         time.sleep(2)
         return
-    
+#-----------------------------------------------------------------------------------------------------
+    #ADMIN MENU METHOD
+#-----------------------------------------------------------------------------------------------------
     @classmethod
     def admin_menu(cls):
         while True:
@@ -166,7 +168,9 @@ class Login:
                 input(Fore.LIGHTBLUE_EX + "Press any key to continue...."+ Style.RESET_ALL)
                 break
     
-    # Admin Book Management Menu
+#-----------------------------------------------------------------------------------------------------
+    #ADMIN BOOK MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------
     @classmethod
     def admin_book_management(cls):
         """Admin menu for book-related actions."""
@@ -190,8 +194,9 @@ class Login:
                 break  # Go back to main admin menu
             elif book_choice not in [1, 2, 3, 4, 5]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
-    
-    # User Management Menu
+#-----------------------------------------------------------------------------------------------------
+    #ADMIN USER MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------    
     @classmethod
     def admin_user_management(cls):
         """Admin menu for user-related actions."""
@@ -214,8 +219,9 @@ class Login:
                 break
             elif user_choice not in [1, 2, 3, 4]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option."+ Style.RESET_ALL)
-    
-    # Borrowing & Returns Menu
+#-----------------------------------------------------------------------------------------------------
+    #ADMIN BORROWING & RETURN MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------      
     @classmethod
     def admin_borrowing_return_management(cls):
         while True:
@@ -237,7 +243,9 @@ class Login:
             elif borrow_choice not in [1, 2, 3]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option."+ Style.RESET_ALL)
     
-    # Reports & Policies Menu
+#-----------------------------------------------------------------------------------------------------
+    #ADMIN REPORTS & POLICIES MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------  
     @classmethod
     def admin_report_policies_management(cls):
         while True:
@@ -259,7 +267,9 @@ class Login:
             elif report_choice not in [1, 2, 3]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option."+ Style.RESET_ALL)
 
-    # Notifications & Reminders Menu
+#-----------------------------------------------------------------------------------------------------
+    #ADMIN NOTIFICATION & REMINDERS MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------  
     @classmethod
     def admin_notification_reminder_management(cls):
         while True:
@@ -279,7 +289,9 @@ class Login:
             elif notify_choice != 1:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option."+ Style.RESET_ALL)
     
-    #Admin Account Management menu
+#-----------------------------------------------------------------------------------------------------
+    #ADMIN ACCOUNT MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------  
     @classmethod
     def admin_account_management(cls):
         """admin menu for Account Management related actions."""
@@ -389,7 +401,9 @@ class Login:
         time.sleep(2)
         return
                 
-                
+#-----------------------------------------------------------------------------------------------------
+    #STUDENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------                  
     @classmethod
     def student_menu(cls):
          while True:
@@ -424,7 +438,9 @@ class Login:
                 print(Fore.GREEN + "👋 Logging out..." + Style.RESET_ALL)
                 input(Fore.LIGHTBLUE_EX + "Press any key to continue...."+ Style.RESET_ALL)
                 break
-    
+#-----------------------------------------------------------------------------------------------------
+    #STUDENT BOOK MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------      
     #Student Book Management Menu
     @classmethod
     def student_book_management(cls):
@@ -447,7 +463,9 @@ class Login:
             elif book_choice not in [1, 2]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
     
-    #Student Borrowing & Returns menu
+#-----------------------------------------------------------------------------------------------------
+    #STUDENT BORROWING & RETURNS MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------  
     @classmethod
     def student_borrowing_returns(cls):
         """student menu for Borrowing & Returns related actions."""
@@ -469,8 +487,10 @@ class Login:
                 return  # Go back to main student menu
             elif book_choice not in [1, 2, 3]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
-    
-    #Student Fines & Due Dates menu
+
+#-----------------------------------------------------------------------------------------------------
+    #STUDENT FINES & DUES MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------  
     @classmethod
     def student_fines_due_dates(cls):
         """student menu for Fines & Due Date related actions."""
@@ -492,7 +512,9 @@ class Login:
             elif book_choice not in [1, 2]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
     
-    #Student Account Management menu
+#-----------------------------------------------------------------------------------------------------
+    #STUDENT ACCOUNT MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------  
     @classmethod
     def student_account_management(cls):
         """student menu for Account Management related actions."""
@@ -515,6 +537,9 @@ class Login:
             elif book_choice not in [1,2,3]:
                 input(Fore.RED + "❌ Invalid option! Please choose a valid option." + Style.RESET_ALL)
     
+#-----------------------------------------------------------------------------------------------------
+    #STUDENT ADDITIONAL FEATURES MANAGEMENT MENU METHOD
+#-----------------------------------------------------------------------------------------------------  
     #Student  Additional Features (Optional for Later) menu
     @classmethod
     def student_additional_features(cls):
@@ -623,8 +648,10 @@ class Login:
                (*selected_indexes, *answers, phone))
              cursor.connection.commit()
         print(Fore.LIGHTGREEN_EX + f"\nAnswers updated successfully." + Style.RESET_ALL)
-        
-    #Screen Clearing Method
+
+#-----------------------------------------------------------------------------------------------------
+    #SCREEN CLEARING METHOD
+#-----------------------------------------------------------------------------------------------------          
     @staticmethod
     def clear_screen():
         """Clears the console screen based on OS."""

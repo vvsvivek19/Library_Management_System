@@ -41,7 +41,12 @@ class Registration:
                 print(Fore.LIGHTCYAN_EX + "2. 🎓Student"+ Style.RESET_ALL)
                 time.sleep(0.1)
                 print(Fore.LIGHTCYAN_EX + "3. 🏡Go back to Home Menu"+ Style.RESET_ALL)
-                choice = int(input(Fore.LIGHTYELLOW_EX + "Please choose from above options: "+ Style.RESET_ALL))
+                
+                try:
+                    choice = int(input(Fore.LIGHTYELLOW_EX + "Please choose from above options: "+ Style.RESET_ALL))
+                except:
+                    input(Fore.RED + "❌ Invalid input! Please enter a number (1, 2, or 3)." + Style.RESET_ALL)
+                    return
                 
                 #Admin Registration Logic
                 if choice == 1:
@@ -50,6 +55,7 @@ class Registration:
                     print(Fore.LIGHTYELLOW_EX + "Please enter the super admin or admin credentials"+ Style.RESET_ALL)
                     username = input(Fore.LIGHTMAGENTA_EX + "Username: "+ Style.RESET_ALL).strip()
                     password = getpass.getpass(Fore.LIGHTMAGENTA_EX + "Password: " + Style.RESET_ALL).strip()
+                    #checking if the admin user exists
                     cursor.execute("SELECT password, name FROM admin WHERE username = %s ",(username,))
                     result = cursor.fetchone()
                     if result:
@@ -61,12 +67,14 @@ class Registration:
                             print(Fore.CYAN + "="*66 + Style.RESET_ALL)
                             print(Fore.GREEN + f"✅ Welcome {result[1]}! You are authorized to register a new admin."+ Style.RESET_ALL)
                             try:
-                                new_admin_username = input(Fore.LIGHTMAGENTA_EX + "Please enter new admin username: "+ Style.RESET_ALL).strip()
-                                new_admin_name = input(Fore.LIGHTMAGENTA_EX + "Please enter new admin name: "+ Style.RESET_ALL).strip()
-                                new_admin_email = input(Fore.LIGHTMAGENTA_EX + "Please enter new admin email: "+ Style.RESET_ALL).strip()
+                                new_admin_username = input(Fore.LIGHTMAGENTA_EX + "Enter new admin username: "+ Style.RESET_ALL).strip()
+                                new_admin_name = input(Fore.LIGHTMAGENTA_EX + "Enter new admin name: "+ Style.RESET_ALL).strip()
+                                
+                                #Feature: implement email validation
+                                new_admin_email = input(Fore.LIGHTMAGENTA_EX + "Enter new admin email: "+ Style.RESET_ALL).strip()
                                 
                                 while True:
-                                    new_user_phone = input(Fore.LIGHTMAGENTA_EX + "Please enter phone number: "+ Style.RESET_ALL)
+                                    new_user_phone = input(Fore.LIGHTMAGENTA_EX + "Enter phone number: "+ Style.RESET_ALL)
                                     if not new_user_phone.isdigit() or len(new_user_phone) < 10:
                                         input(Fore.RED + "❌ Invalid phone number. Please enter a valid 10-digit number."+ Style.RESET_ALL)
                                     else:
@@ -80,6 +88,7 @@ class Registration:
                                     return
                                 
                                 # Password validation
+                                # Feature: need to implement password policy
                                 while True:
                                     new_user_password = input(Fore.LIGHTMAGENTA_EX + "Set password: "+ Style.RESET_ALL).strip()
                                     re_enter_password = input(Fore.LIGHTMAGENTA_EX + "Confirm password: "+ Style.RESET_ALL).strip()
@@ -92,6 +101,7 @@ class Registration:
                                 cursor.execute("""INSERT INTO admin (username, name, email, phone, password)
                                                 VALUES (%s, %s, %s, %s, %s)""",(new_admin_username,new_admin_name,new_admin_email,new_user_phone,hashed_password.decode()))
                                 conn.commit()
+                                cls.admin_set_default_security_questions(cursor,new_admin_username,new_admin_name)
                                 print(Fore.GREEN + "✅ New Admin Registered successfully."+ Style.RESET_ALL)
                                 input(Fore.LIGHTRED_EX + "📌 Please remember your username and password!"+ Style.RESET_ALL)
                             
@@ -142,6 +152,7 @@ class Registration:
                         cursor.execute("""INSERT INTO users (name, email, phone, password)
                                         VALUES (%s, %s, %s, %s)""",(name,email,phone,hashed_password.decode()))
                         conn.commit()
+                        cls.student_set_security_questions(cursor,email)
                         print(Fore.GREEN + "✅ User Registered successfully."+ Style.RESET_ALL)
                         input(Fore.LIGHTRED_EX + "📌 Please remember your email and password!"+ Style.RESET_ALL)
                     
@@ -173,7 +184,31 @@ class Registration:
 # STATIC METHOD TO SET DEFAULT ANSWERS OF SECURITY QUESTIONS FOR ADMIN
 #-----------------------------------------------------------------------------------------------------
     @staticmethod
-    def admin_set_default_security_questions(cursor, username):
+    def admin_set_default_security_questions(cursor, new_admin_username,new_admin_name):
+        
+        # Generate a hashed default answer
+        default_answer = "DefaultAnswer123"
+        hashed_default_answer = bcrypt.hashpw(default_answer.encode(), bcrypt.gensalt())
+
+        #default indexes for new admin user
+        selected_indexes = [0, 1, 2] 
+        
+        print(f"Updating admin {new_admin_name} with default security questions...")
+        cursor.execute("""
+        UPDATE admin 
+        SET ques_1 = %s, ques_2 = %s, ques_3 = %s, ans_1 = %s, ans_2 = %s, ans_3 = %s
+        WHERE username = %s
+    """, (*selected_indexes, hashed_default_answer, hashed_default_answer, hashed_default_answer, new_admin_username))
+
+        cursor.connection.commit()
+
+        
+        print(Fore.LIGHTGREEN_EX + f"\n✅ Default Security questions updated successfully." + Style.RESET_ALL)
+#-----------------------------------------------------------------------------------------------------
+# STATIC METHOD TO SET DEFAULT ANSWERS OF SECURITY QUESTIONS FOR STUDENTS
+#-----------------------------------------------------------------------------------------------------
+    @staticmethod
+    def student_set_security_questions(cursor, email):
         
         print(Fore.LIGHTYELLOW_EX + "Select 3 questions from below list of questions: " + Style.RESET_ALL)
         
@@ -200,15 +235,15 @@ class Registration:
             hashed_answer = bcrypt.hashpw(answer.encode(),bcrypt.gensalt()).decode() #hashing the answer
             answers.append(hashed_answer)
         
-        cursor.execute("""UPDATE admin 
+        cursor.execute("""UPDATE users 
                   SET ques_1 = %s, ques_2 = %s, ques_3 = %s, ans_1 = %s, ans_2 = %s, ans_3 = %s 
-                  WHERE username = %s""",
-               (*selected_indexes, *answers, username))
+                  WHERE email = %s""",
+               (*selected_indexes, *answers, email))
         cursor.connection.commit()
 
         
         print(Fore.LIGHTGREEN_EX + f"\n✅ Security questions updated successfully." + Style.RESET_ALL)
-        
+                
     
     #Screen Clearing Method
     @staticmethod

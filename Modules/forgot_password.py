@@ -7,8 +7,8 @@ import bcrypt
 import getpass
 import os
 from colorama import Fore, Style
-from Modules.utils import SECURITY_QUESTIONS
-from dotenv import load_dotenv
+from Modules.utils import SECURITY_QUESTIONS,validate_password
+
 
 class ForgotPassword:
 #----------------------------------------------------------------------------------------------------------------------------
@@ -18,12 +18,11 @@ class ForgotPassword:
     def forgot_password(cls):
         """Handles login logic for Admin and Student."""
         try:
-            load_dotenv()
             conn = pymysql.connect(
-                host=os.getenv("DB_HOST"),
-                user=os.getenv("DB_USER"),
-                password=os.getenv("DB_PASSWORD"),
-                database=os.getenv("DB_NAME")
+                host="localhost",
+                user="root",
+                password="Vivek1465",
+                database="librarydb"
             )
             cursor = conn.cursor()
             attempts = 0
@@ -82,6 +81,8 @@ class ForgotPassword:
                             # Feature: need to implement password policy
                             while True:
                                 new_user_password = input(Fore.LIGHTMAGENTA_EX + "Set New password: "+ Style.RESET_ALL).strip()
+                                if not validate_password(new_user_password):
+                                        print(Fore.RED + "Please enter a password of length 8 to 20 characters,, 1 uppercase, 1 lowercase, 1 number, 1 special character!!!" + Style.RESET_ALL)
                                 cursor.execute("SELECT password FROM admin WHERE username = %s ",(username,))
                                 existing_password = cursor.fetchone()
                                 if bcrypt.checkpw(new_user_password.encode(),existing_password[0].encode()):
@@ -183,6 +184,9 @@ class ForgotPassword:
                             # Feature: need to implement password policy
                             while True:
                                 new_user_password = input(Fore.LIGHTMAGENTA_EX + "Set New password: "+ Style.RESET_ALL).strip()
+                                
+                                if not validate_password(new_user_password):
+                                        print(Fore.RED + "Please enter a password of length 8 to 20 characters,, 1 uppercase, 1 lowercase, 1 number, 1 special character!!!" + Style.RESET_ALL)
                                 
                                 if email != None:
                                     cursor.execute("SELECT password FROM users WHERE email = %s ",(email,))

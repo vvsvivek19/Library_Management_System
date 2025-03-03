@@ -1,3 +1,5 @@
+import re
+
 SECURITY_QUESTIONS = [
             "What is the name of your first pet?",
             "What was your childhood nickname?",
@@ -9,3 +11,7 @@ SECURITY_QUESTIONS = [
             "What is your favorite movie?",
             "What was your first job?"
         ]
+
+def validate_password(password):
+    validate = re.match(r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$",password)
+    return(bool(validate))

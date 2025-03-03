@@ -7,7 +7,8 @@ import bcrypt
 import getpass
 import os
 from colorama import Fore, Style
-from Modules.utils import SECURITY_QUESTIONS
+from Modules.utils import SECURITY_QUESTIONS, validate_password
+import re
 
 
 class Registration:
@@ -91,6 +92,8 @@ class Registration:
                                 # Feature: need to implement password policy
                                 while True:
                                     new_user_password = input(Fore.LIGHTMAGENTA_EX + "Set password: "+ Style.RESET_ALL).strip()
+                                    if not validate_password(new_user_password):
+                                        print(Fore.RED + "Please enter a password of length 8 to 20 characters,, 1 uppercase, 1 lowercase, 1 number, 1 special character!!!" + Style.RESET_ALL)
                                     re_enter_password = input(Fore.LIGHTMAGENTA_EX + "Confirm password: "+ Style.RESET_ALL).strip()
                                     if new_user_password == re_enter_password:
                                         break
@@ -142,6 +145,8 @@ class Registration:
                         # Password validation
                         while True:
                             password = input(Fore.LIGHTMAGENTA_EX + "Set password: "+ Style.RESET_ALL).strip()
+                            if not validate_password(password):
+                                print(Fore.RED + "Please enter a password of length 8 to 20 characters,, 1 uppercase, 1 lowercase, 1 number, 1 special character!!!" + Style.RESET_ALL)
                             confirm_password = input(Fore.LIGHTMAGENTA_EX + "Confirm password: "+ Style.RESET_ALL).strip()
                             if password == confirm_password:
                                 break
